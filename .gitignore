@@ -1,0 +1,5 @@
+*.log
+
+# important DB information
+
+pdoConnect.php
