@@ -1,6 +1,5 @@
 <?php
 require 'function.php';
-const JWT_SECRET_KEY = "TEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEYTEST_KEY";
 
 $res = (Object)Array();
 header('Content-Type: json');
@@ -27,7 +26,7 @@ try {
          * 마지막 수정 날짜 : 19.07.26
          */
         case "makeUser":
-
+            
             $id = $req->User_ID;
             $email = $req->User_Email;
             $name = $req->User_Name;
@@ -38,6 +37,25 @@ try {
             $res->message = "성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+
+         case "saTripmake":
+
+
+
+             $id = $req->User_ID;
+
+             $title = $req->Trip_Title;
+             $content = $req->Trip_Content;
+             $img = $req->Trip_Img;
+
+             saTripmake($id, $title, $content,$img);
+
+             $res->isSuccess = $id;
+             $res->code = $title;
+             $res->message = $content;
+             echo json_encode($res, JSON_NUMERIC_CHECK);
+             break;
+
         /*
          * API No. 2
          * API Name : 회원정보 보여주기
@@ -52,95 +70,122 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
         /*
-* API No. 2
-* API Name : 회원정보 보여주기
-* 마지막 수정 날짜 : 19.07.26
-*/
-
+          * API No. 3
+            * API Name :여행 정보 만들기
+            * 마지막 수정 날짜 : 19.07.30
+            * 마지막 수정 날짜 : 19.07.30
+                */
         case "makeTrip":
+            $id = $req->User_ID;
+            $title = $req->Trip_Title;
+            $content = $req->Trip_Content;
+            $img = $req->Trip_Img;
 
-            $userid = $req->User_ID;
-            $triptitle = $req->Trip_Title;
-            $tripcontent = $req->Trip_Content;
-            $tripimg = $req->Trip_Img;
-            makeTrip($userid, $triptitle, $tripcontent,$tripimg);
+            $res->Trip_No = makeTrip($id, $title, $content,$img);
+
 
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
-
-
-        case "testDetail":
-            http_response_code(200);
-            $res->result = testDetail($vars["testNo"]);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "테스트 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
         /*
-         * API No. 0
-         * API Name : 테스트 Body & Insert API
-         * 마지막 수정 날짜 : 19.04.29
-         */
-        case "testPost":
-            http_response_code(200);
-            $res->result = testPost($req->name);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "테스트 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
+           * API No. 4
+         * API Name :여행 정보 보여주기
+         * 마지막 수정 날짜 : 19.07.31
+           */
+
+         case "showTrip":
+             $res->res = showTrip();
+             $res->isSuccess = TRUE;
+             $res->code = 100;
+             $res->message = "성공";
+             echo json_encode($res, JSON_NUMERIC_CHECK);
+             break;
+
+             /*
+       * API No. 4
+         * API Name :여행 정보 보여주기
+         * 마지막 수정 날짜 : 19.07.31
+      */
+         case "showPagingTrip":
+             $itemid = (int)$vars["itemno"];
+
+             $res->res = showPagingTrip($itemid);
+             $res->isSuccess = TRUE;
+             $res->code = 100;
+             $res->message = "성공";
+             echo json_encode($res->res, JSON_NUMERIC_CHECK);
+             break;
+
         /*
-         * API No. 0
-         * API Name : JWT 유효성 검사 테스트 API
-         * 마지막 수정 날짜 : 19.04.25
-         */
-        case "validateJwt":
-            // jwt 유효성 검사
-            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 201;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
+         * API No. 5
+           * API Name :여행 개별 사진 저장
+           * 마지막 수정 날짜 : 19.07.31
+        */
+        case "makeInfo":
+            $tripno = $req->Trip_No;
+            $infoimg = $req->Info_Image;
+            $infolong = $req->Info_Longitude;
+            $infolat = $req->Info_Latitude;
+            $infocon = $req->Info_Content;
+            $infodate= $req->Info_Date;
 
-            http_response_code(200);
-            $res->isSuccess = TRUE;
+
+            $infotimedate = date("Y-m-d H:i:s", strtotime($infodate));
+
+            makeInfo($tripno, $infoimg, $infolong,$infolat,$infocon,$infotimedate);
+
+            $res->isSuccess = $infotimedate;
             $res->code = 100;
-            $res->message = "테스트 성공";
-
+            $res->message = "성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
-        /*
-         * API No. 0
-         * API Name : JWT 생성 테스트 API
-         * 마지막 수정 날짜 : 19.04.25
-         */
-        case "createJwt":
-            // jwt 유효성 검사
-            if (!isValidHeader($jwt, JWT_SECRET_KEY)) {
-                $res->isSuccess = FALSE;
-                $res->code = 201;
-                $res->message = "유효하지 않은 토큰입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-                addErrorLogs($errorLogs, $res, $req);
-                return;
-            }
-            http_response_code(200);
+        /* API No. 6
+           API Name :여행 세부 보기
+           마지막 수정 날짜 : 19.07.31*/
 
-            //페이로드에 맞게 다시 설정 요함
-            $jwt = getJWToken($userId, $userPw, $loginType, $accessToken, $refreshToken, JWT_SECRET_KEY);
-            $res->result->jwt = $jwt;
+        case "showTripInfo":
+            $tripno = $vars["tripno"];
+
+
+            $res->res = showTripInfo($tripno);
             $res->isSuccess = TRUE;
             $res->code = 100;
-            $res->message = "테스트 성공";
+            $res->message = "성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+
+        /* API No. 7
+       API Name : 여행 삭제
+       마지막 수정 날짜 : 19.07.31*/
+
+        case "deleteTrip":
+            $tripno = $req->Trip_No;
+
+            deleteTrip($tripno);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+        /* API No. 8
+       API Name : 여행 수정
+       마지막 수정 날짜 : 19.07.30*/
+
+        case "showMyTrip":
+            $userid = $vars["userid"];
+
+            $res->res=showMyTrip($userid);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "성공";
+            echo json_encode( $res->res, JSON_NUMERIC_CHECK);
+            break;
+
+
+
+
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);

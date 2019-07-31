@@ -1,47 +1,35 @@
 <?php
+
 require './model/pdo.php';
 require './vendor/autoload.php';
 
 use \Monolog\Logger as Logger;
 use Monolog\Handler\StreamHandler;
-
-
-
-
-header('Access-Control-Allow-Origin: *');
-header("Content-type:multipart/form-data");
-header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-  Disposition, Content-Description');
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
 
-//에러출력하게 하는 코드
-error_reporting(E_ALL); ini_set("display_errors", 1);
+//error_reporting(E_ALL); ini_set("display_errors", 1);
 
-$dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
+$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     //Main Server API
-     $r->addRoute('GET', '/', 'index');
-     $r->addRoute('POST', '/user', 'makeUser');
-    $r->addRoute('GET', '/user/{userid}', 'showUser');
-     $r->addRoute('POST', '/trip', 'makeTrip');
-    $r->addRoute('GET', '/trip', 'showTrip');
+    $r->addRoute('GET', '/', 'index'); // 기본값
+    $r->addRoute('POST', '/user', 'makeUser'); // 아이디 생성
+    $r->addRoute('GET', '/user/{userid}', 'showUser'); // 내정보 확인
+
+    $r->addRoute('POST', '/newtrip', 'makeTrip'); //여행일지 생성
+
+    $r->addRoute('GET', '/trip', 'showTrip'); //여행 일지 전체보기
+    $r->addRoute('GET', '/mytrip/{userid}', 'showMyTrip'); //내 여행 일지 전체보기
+
+    $r->addRoute('GET', '/trip/{itemno}', 'showPagingTrip'); //여행 일지 페이징네이션
+    $r->addRoute('POST', '/tripdelete', 'deleteTrip'); // 여행 일지 삭제
 
 
-     $r->addRoute('GET', '/test', 'test');
-     $r->addRoute('GET', '/test/{testNo}', 'testDetail');
-     $r->addRoute('POST', '/test', 'testPost');
-     $r->addRoute('GET', '/jwt', 'validateJwt');
-     $r->addRoute('POST', '/jwt', 'createJwt');
-
-//    $r->addRoute('GET', '/logs/error', 'ERROR_LOGS');
-//    $r->addRoute('GET', '/logs/access', 'ACCESS_LOGS');
+    $r->addRoute('POST', '/info', 'makeInfo'); // 여행 사진들 저장
+    $r->addRoute('GET', '/info/{tripno}', 'showTripInfo'); //여행 일지 전체보기
 
 
-//    $r->addRoute('GET', '/users', 'get_all_users_handler');
-//    // {id} must be a number (\d+)
-//    $r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
-//    // The /{title} suffix is optional
-//    $r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'get_article_handler');
+    $r->addRoute('POST', '/satrip', 'saTripmake'); // 아이디 생성
 });
 
 // Fetch method and URI from somewhere
@@ -57,8 +45,8 @@ $uri = rawurldecode($uri);
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
 // 로거 채널 생성
-$accessLogs = new Logger('ACCESS_LOGS');
-$errorLogs = new Logger('ERROR_LOGS');
+$accessLogs =  new Logger('BIGS_ACCESS');
+$errorLogs =  new Logger('BIGS_ERROR');
 // log/your.log 파일에 로그 생성. 로그 레벨은 Info
 $accessLogs->pushHandler(new StreamHandler('logs/access.log', Logger::INFO));
 $errorLogs->pushHandler(new StreamHandler('logs/errors.log', Logger::ERROR));
@@ -81,5 +69,10 @@ switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::FOUND:
         $handler = $routeInfo[1]; $vars = $routeInfo[2];
         require './controller/mainController.php';
+
         break;
 }
+
+
+
+
